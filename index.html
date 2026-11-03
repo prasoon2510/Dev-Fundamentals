@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Merge Request: a dev fundamentals quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--ink:#1b2433;--mut:#5d6779;--card:#fff;--line:#d3d9e4;--ok:#1a9a5b;--bad:#d6394a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121722;--ink:#e8ecf4;--mut:#98a2b5;--card:#1b2231;--line:#2c3547;--ok:#3dd68c;--bad:#ff6b7a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121722;--ink:#e8ecf4;--mut:#98a2b5;--card:#1b2231;--line:#2c3547;--ok:#3dd68c;--bad:#ff6b7a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Bricolage Grotesque",system-ui,sans-serif}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:.88em}
+code{background:color-mix(in srgb,var(--ink) 10%,transparent);padding:.1em .4em;border-radius:4px}
+main{max-width:680px;margin:0 auto;padding:28px 18px 48px}
+h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1.05;margin:0 0 8px;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:0 0 28px;max-width:46ch}
+.branches{position:relative;list-style:none;margin:0;padding:0}
+.branches:before{content:"";position:absolute;left:13px;top:10px;bottom:10px;width:3px;background:var(--line);border-radius:2px}
+.branches li{position:relative;padding-left:44px;margin-bottom:10px}
+.branches .dot{position:absolute;left:5px;top:22px;width:19px;height:19px;border-radius:50%;background:var(--c);border:4px solid var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--c,#4c7dff);outline-offset:2px}
+.topic{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.topic:hover{border-color:var(--c)}
+.topic b{font-size:1.08rem}
+.topic small{color:var(--mut);display:block}
+.best{font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--mut);white-space:nowrap}
+.mix{width:100%;margin-top:18px;padding:14px;border-radius:10px;border:2px dashed var(--mut);background:none;font-weight:700}
+.mix:hover{border-style:solid}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;color:var(--mut)}
+.link{background:none;border:0;padding:4px 0;text-decoration:underline}
+.quiz{display:grid;grid-template-columns:28px 1fr;gap:14px}
+.rail{display:flex;flex-direction:column;align-items:center;gap:0}
+.rail i{width:16px;height:16px;border-radius:50%;border:3px solid var(--line);background:var(--bg);flex:none}
+.rail s{width:3px;flex:1;min-height:10px;background:var(--line)}
+.rail i.ok{background:var(--ok);border-color:var(--ok)}
+.rail i.bad{background:var(--bad);border-color:var(--bad)}
+.rail i.cur{border-color:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 25%,transparent)}
+.card{background:var(--card);border:1px solid var(--line);border-top:6px solid var(--c);border-radius:12px;padding:20px}
+.card h2{font-size:1.3rem;line-height:1.3;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:9px;padding:11px 14px;margin-bottom:9px}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default;color:inherit}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--card))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--card))}
+.why{margin:14px 0;padding:12px 14px;border-left:4px solid var(--c);background:var(--bg);border-radius:0 8px 8px 0}
+.go{background:var(--ink);color:var(--bg);border:0;border-radius:9px;padding:11px 20px;font-weight:700}
+.big{font-size:3rem;font-weight:700;line-height:1;margin:6px 0}
+.msg{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px}
+.miss{margin:16px 0;padding:0;list-style:none}
+.miss li{padding:10px 0;border-top:1px solid var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.ghost{background:none;border:2px solid var(--line);border-radius:9px;padding:9px 18px;font-weight:700}
+@media(prefers-reduced-motion:no-preference){.opt,.topic{transition:border-color .15s}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var T=[
+{id:"py",n:"Python",c:"#3b82f6",q:[
+["What does `len({1,2,2,3})` return?",["4","3","2","Error"],1,"A set keeps unique values, so it holds {1, 2, 3}."],
+["Which is mutable in Python?",["tuple","str","list","frozenset"],2,"Lists can be changed in place; tuples, strings and frozensets cannot."],
+["What does `[x*x for x in range(3)]` produce?",["[0, 1, 4]","[1, 4, 9]","[0, 1, 2]","[0, 2, 4]"],0,"range(3) gives 0, 1, 2, and each value is squared."],
+["What does `def f(a, b=2)` mean?",["b is required","b defaults to 2 if omitted","b is a constant","a defaults to 2"],1,"Parameters with = give a default used when the caller skips them."]]},
+{id:"lx",n:"Linux commands",c:"#f59e0b",q:[
+["Which command shows the current directory?",["ls","cd","pwd","who"],2,"`pwd` prints the working directory."],
+["What does `chmod 755 run.sh` do?",["Deletes the file","Owner rwx, others r-x","Everyone rwx","Renames the file"],1,"7 = rwx for the owner, 5 = r-x for group and others."],
+["Which command searches text inside files?",["grep","find","ls","cat -n"],0,"`grep pattern file` prints matching lines. `find` searches file names."],
+["What does `ls -la` show?",["Only folders","Files with sizes, owners and hidden files","Disk usage","Running processes"],1,"-l is long format and -a includes dotfiles."]]},
+{id:"gt",n:"Git",c:"#f05133",q:[
+["What does `git pull` do?",["Uploads commits","Fetches remote changes and merges them","Creates a branch","Deletes history"],1,"`git pull` is `git fetch` followed by a merge (or rebase if configured)."],
+["How do you undo the last commit but keep your changes staged?",["git reset --soft HEAD~1","git reset --hard HEAD~1","git revert --hard","git clean -f"],0,"--soft moves HEAD back but leaves changes staged. --hard discards them."],
+["What does `git stash` do?",["Deletes untracked files","Shelves uncommitted changes for later","Pushes to remote","Squashes commits"],1,"Stash saves your working changes so you can switch context, then `git stash pop` restores them."],
+["Which command shows a compact commit history?",["git status","git diff","git log --oneline","git show-branch -a"],2,"`git log --oneline` prints one line per commit."]]},
+{id:"sq",n:"SQL",c:"#14b8a6",q:[
+["Which clause filters groups after aggregation?",["WHERE","HAVING","LIMIT","ON"],1,"WHERE filters rows before grouping. HAVING filters the groups."],
+["Which join keeps all rows from the left table?",["INNER JOIN","LEFT JOIN","CROSS JOIN","SELF JOIN only"],1,"LEFT JOIN returns every left row, with NULLs where there is no match."],
+["What does `COUNT(*)` count?",["Non-null values in one column","All rows","Distinct values","Columns"],1,"COUNT(*) counts rows. COUNT(col) skips NULLs."],
+["Which keyword removes duplicate rows from a result?",["UNIQUE","DISTINCT","DROP","SINGLE"],1,"`SELECT DISTINCT` returns each unique row once."]]},
+{id:"br",n:"Branching strategies",c:"#a855f7",q:[
+["In GitFlow, which branch holds production-ready code?",["develop","feature/*","main","release/*"],2,"main holds released code. develop is where features integrate."],
+["What defines trunk-based development?",["Long-lived feature branches","Small, frequent merges into one main branch","One branch per developer for months","No code review"],1,"Teams merge small changes to trunk often, usually behind feature flags."],
+["Which branch type fixes an urgent production bug in GitFlow?",["feature","hotfix","release","bugfeature"],1,"Hotfix branches start from main and merge back into main and develop."],
+["What is the main benefit of short-lived branches?",["Fewer merge conflicts","More commits","Larger pull requests","Skipping tests"],0,"Branches that live briefly diverge less, so merges are easier."]]},
+{id:"sd",n:"SDLC",c:"#ec4899",q:[
+["Which SDLC phase comes right after requirements analysis?",["Testing","Design","Deployment","Maintenance"],1,"Typical order: requirements, design, implementation, testing, deployment, maintenance."],
+["Which model delivers work in short iterations (sprints)?",["Waterfall","Agile","V-model","Big bang"],1,"Agile builds and reviews in short cycles with continuous feedback."],
+["What is unit testing?",["Testing the whole system","Testing individual functions or components","Testing in production","Load testing"],1,"Unit tests check small pieces in isolation, usually automatically."],
+["What does CI/CD stand for?",["Code Inspect / Code Deploy","Continuous Integration / Continuous Delivery","Central Index / Central Data","Compile Init / Compile Debug"],1,"CI merges and tests often. CD automates delivering the result."]]},
+{id:"pp",n:"Python project concepts",c:"#22c55e",q:[
+["Why use a virtual environment?",["Faster code","Isolate dependencies per project","Replace git","Compile to binary"],1,"A venv gives each project its own packages and versions."],
+["What does `requirements.txt` hold?",["Test results","Pinned list of dependencies","Git history","Docker logs"],1,"`pip install -r requirements.txt` recreates the dependencies."],
+["What does `if __name__ == \"__main__\":` do?",["Runs code only when the file is executed directly","Imports the module","Defines a class","Catches errors"],0,"Code under it is skipped when the file is imported as a module."],
+["Which tool runs automated tests in most Python projects?",["pytest","pipenv","flake8","black"],0,"pytest discovers and runs tests. flake8 and black handle linting and formatting."]]}
+];
+var app=document.getElementById("app"),S={};
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+function fmt(s){return esc(s).replace(/`([^`]+)`/g,"<code>$1</code>")}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function best(id){try{var v=localStorage.getItem("mr-"+id);return v===null?null:+v}catch(e){return null}}
+function save(id,v){try{var b=best(id);if(b===null||v>b)localStorage.setItem("mr-"+id,v)}catch(e){}}
+function home(){
+ var h='<h1>Merge request</h1><p class="sub">Pick a branch, answer its commits, then merge. Seven topics, instant explanations, and your best score is saved on this device.</p><ul class="branches">';
+ T.forEach(function(t){var b=best(t.id);
+  h+='<li style="--c:'+t.c+'"><span class="dot"></span><button class="topic" data-id="'+t.id+'"><span><b>'+t.n+'</b><small>'+t.q.length+' questions</small></span><span class="best">'+(b===null?"not merged":"best "+b+"/"+t.q.length)+'</span></button></li>'});
+ h+='</ul><button class="mix" data-id="mix">Mixed review: 10 random questions from every topic</button>';
+ app.innerHTML=h;
+ app.querySelectorAll("[data-id]").forEach(function(b){b.onclick=function(){start(b.dataset.id)}});
+}
+function start(id){
+ var t,items;
+ if(id==="mix"){t={id:"mix",n:"Mixed review",c:"#64748b"};items=[];T.forEach(function(x){x.q.forEach(function(q){items.push(q)})});items=shuf(items).slice(0,10)}
+ else{t=T.filter(function(x){return x.id===id})[0];items=shuf(t.q)}
+ S={t:t,qs:items.map(function(q){var o=q[1].map(function(x,i){return{x:x,r:i===q[2]}});return{q:q[0],o:shuf(o),e:q[3]}}),i:0,res:[],done:false};
+ show();
+}
+function show(){
+ var s=S,q=s.qs[s.i],c=s.t.c;
+ var rail="";s.qs.forEach(function(_,k){var st=k<s.res.length?(s.res[k]?"ok":"bad"):(k===s.i?"cur":"");rail+='<i class="'+st+'"></i>'+(k<s.qs.length-1?"<s></s>":"")});
+ var h='<div class="bar"><button class="link" id="back">Back to branches</button><span class="mono">'+esc(s.t.n)+' '+(s.i+1)+'/'+s.qs.length+'</span></div><div class="quiz" style="--c:'+c+'"><div class="rail">'+rail+'</div><div class="card"><h2>'+fmt(q.q)+'</h2><div id="opts">';
+ q.o.forEach(function(o,k){h+='<button class="opt" data-k="'+k+'">'+fmt(o.x)+'</button>'});
+ h+='</div><div id="fb"></div></div></div>';
+ app.innerHTML=h;
+ document.getElementById("back").onclick=home;
+ app.querySelectorAll(".opt").forEach(function(b){b.onclick=function(){answer(+b.dataset.k)}});
+}
+function answer(k){
+ var s=S,q=s.qs[s.i],right=q.o[k].r;s.res.push(right);
+ app.querySelectorAll(".opt").forEach(function(b,j){b.disabled=true;if(q.o[j].r)b.classList.add("ok");else if(j===k)b.classList.add("bad")});
+ var last=s.i===s.qs.length-1;
+ document.getElementById("fb").innerHTML='<div class="why"><b>'+(right?"Committed. ":"Not quite. ")+'</b>'+fmt(q.e)+'</div><button class="go" id="nx">'+(last?"Merge and see score":"Next question")+'</button>';
+ var nx=document.getElementById("nx");nx.focus();
+ nx.onclick=function(){if(last)finish();else{s.i++;show()}};
+ var r=app.querySelector(".rail i:not(.ok):not(.bad)");
+ var all=app.querySelectorAll(".rail i");all[s.res.length-1].className=right?"ok":"bad";
+}
+function finish(){
+ var s=S,n=s.res.filter(Boolean).length,tot=s.qs.length;
+ if(s.t.id!=="mix")save(s.t.id,n);
+ var pct=n/tot,line=pct===1?"Clean merge. No conflicts.":pct>=.75?"Merged with minor review comments.":pct>=.5?"Needs another round of review.":"Changes requested. Try the branch again.";
+ var miss="";s.qs.forEach(function(q,k){if(!s.res[k]){var a=q.o.filter(function(o){return o.r})[0].x;miss+='<li>'+fmt(q.q)+'<br><span class="mono">Answer: '+fmt(a)+'</span></li>'}});
+ app.innerHTML='<div class="msg" style="--c:'+s.t.c+'"><span class="mono">'+esc(s.t.n)+'</span><div class="big">'+n+' / '+tot+'</div><p>'+line+'</p>'+(miss?'<b>Review these</b><ul class="miss">'+miss+'</ul>':"")+'<div class="row"><button class="go" id="again">Try again</button><button class="ghost" id="hm">All branches</button></div></div>';
+ document.getElementById("again").onclick=function(){start(s.t.id)};
+ document.getElementById("hm").onclick=home;
+}
+home();
+</script>
+</body>
+</html>
